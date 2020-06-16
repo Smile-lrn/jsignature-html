@@ -116,7 +116,7 @@ html,body{
     height: 100%;
     flex-direction: column;
     display: flex;
-	justify-content:space-between;
+	justify-content: flex-end;
 	background: #f2f3f4;
 	width: 60px;
     align-items: center;
@@ -124,8 +124,8 @@ html,body{
 
 .buttonWrap img,
 .buttonWrap .uploadPic {
-	width: 28px;
-	height: 28px;
+	width: 32px;
+	height: 32px;
 	/* margin-left: 20px; */
 	display: inline-block;
 	position: relative;
@@ -144,25 +144,12 @@ html,body{
 }
 
 .lineWidth_wrap {
-	    position: relative;
-    display: inline-block;
-    font-size: 12px;
-    vertical-align: middle;
-    /* transform: rotate(90deg); */
-    height: 210px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 60px;
-    flex-direction: column;
-}
-.lineWidth_wrap input,.lineWidth_wrap >div{
+	position: relative;
+	display: inline-block;
+	font-size: 12px;
+	vertical-align: middle;
 	transform: rotate(90deg);
-	-webkit-transform: rotate(90deg);
-	-moz-transform: rotate(90deg);
-	-ms-transform: rotate(90deg);
-	-o-transform: rotate(90deg);
-	transform-origin: center center;
+    margin-top: 30px;
 }
 
 .lineWidth_btn_right {
@@ -181,7 +168,6 @@ input.tran_range[type='range'] {
 	font-size: 1em;
 	cursor: pointer;
 	vertical-align: middle;
-	margin-left: 14px;
 }
 
 input.tran_range[type='range']::-webkit-slider-runnable-track {
@@ -265,11 +251,7 @@ input.tran_range[type='range']::-ms-tooltip {
 input.tran_range[type='range']:focus {
 	outline: none;
 }
-.lineWidth_wrap>div{
-	width: 150px;
-    margin-left: -24px;
-    margin-top: -26px;
-}
+
 .color_btn {
 	display: inline-block;
 	width: 10px;

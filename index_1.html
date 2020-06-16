@@ -36,26 +36,26 @@
 		</div>
 		<div id="signature"></div>
 		<div class="buttonWrap">
-			<div class="lineWidth_wrap">
+			<!-- <span class="lineWidth_wrap">
 				<input type="range" class="tran_range" min="1" max="20" value="2" onchange="change_lineWidth(this)" />
 				<div>
 					<span class="lineWidth_btn_left">细</span>
 					<span class="lineWidth_btn_right">粗</span>
 				</div>
-			</div>
-			<img src="imgs/xpc.svg" id="reset">
-			<img src="imgs/save.svg" id="changeToImg">
-			<!-- <span id="reset">清空</span>
-			<span id="changeToImg">提交</span> -->
-			<div class="uploadPic">
+			</span> -->
+			<!-- <img src="imgs/xpc.svg" id="reset">
+			<img src="imgs/save.svg" id="changeToImg"> -->
+			<span id="reset">清空</span>
+			<span id="changeToImg">提交</span>
+			<!-- <div class="uploadPic">
 				<img src="imgs/uploadPic.svg">
 				<input type="file" id="chooseImage" class="filepath" accept="image/jpg,image/jpeg,image/png,image/PNG">
-			</div>
-			<span class="float_right">
+			</div> -->
+			<!-- <span class="float_right">
 				<span data-color="#000" class="color_btn blank active"></span>
 				<span data-color="#f40d0d" class="color_btn red"></span>
 				<span data-color="#1EAFE9" class="color_btn blue"></span>
-			</span>
+			</span> -->
 		</div>
 	</div>
 	<!-- <p>图片预览：</p>
@@ -89,27 +89,27 @@
 			var currDeviceObj = currDevice();
 			var whArr = deviceBrowserWH();
 			// if ($(document).width() > $(document).height()) {
-			if(whArr[0]>whArr[1]){
+			if (whArr[0] > whArr[1]) {
 				// 横屏
 				$('.signTip').css({
 					width: '100vw'
 				});
-				if(currDeviceObj.mobile){
+				if (currDeviceObj.mobile) {
 					if (!currDevice.iPad) {
 						$('.shadowBox').addClass('active')
-					}else{
+					} else {
 						$('.shadowBox').removeClass('active')
 					}
 				}
 
 			} else {
-				$('.subSignTip span,.buttonWrap img').css({
+				$('.subSignTip span,.buttonWrap span').css({
 					transform: 'rotate(90deg)',
 					display: 'inline-block'
 				});
-				// $('.buttonWrap span').css({
-				// 	'margin-bottom': '50px',
-				// });
+				$('.buttonWrap span').css({
+					'margin-bottom': '50px',
+				});
 			}
 			// 初始化画布
 			signObj.jSignature({
@@ -192,7 +192,7 @@
 			console.log(webpageVisibleW + '*' + webpageVisibleH);
 			console.log(webpageW + '*' + webpageH);
 			console.log(webpageVisibleW2 + '*' + webpageVisibleH2);
-			return [w,h]
+			return [w, h]
 			//网页卷去的距离与偏移量
 			/*
 			1.scrollLeft:设置或获取位于给定对象左边界与窗口中目前可见内容的最左端之间的距离；
