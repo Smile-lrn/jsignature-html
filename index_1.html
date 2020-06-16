@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<title>添加手写签名</title>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+	<!-- <meta name="viewport" content="initial-scale=1.0, target-densitydpi=device-dpi" /> -->
+	<meta name="viewport"
+		content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+	<!-- uc强制竖屏 -->
+	<meta name="screen-orientation" content="portrait">
+	<!-- QQ强制竖屏 -->
+	<meta name="x5-orientation" content="portrait">
+	<!-- UC强制全屏 -->
+	<meta name="full-screen" content="yes">
+	<!-- QQ强制全屏 -->
+	<meta name="x5-fullscreen" content="true">
+	<script src="js/jquery-3.2.1.min.js"></script>
+	<script src="js/jSignature.min.js"></script>
+	<link rel="stylesheet" href="css/index_1.css">
+</head>
+
+<body>
+	<div class="signature_wrap" id="signature_wrap">
+		<div class="placeholderBox">
+			<div v-if="isSignaturePadEmpty" class="sign-tips">
+				<div class="sign-tip">请使用正楷书写签名</div>
+				<div class="sign-tip">保证字迹清晰可辨</div>
+			</div>
+		</div>
+		<div class="signTip">
+			<div class="subSignTip">
+				<span>添</span><span>加</span><span>手</span><span>写</span><span>签</span><span>名</span>
+			</div>
+		</div>
+		<div id="signature"></div>
+		<div class="buttonWrap">
+			<div class="lineWidth_wrap">
+				<input type="range" class="tran_range" min="1" max="20" value="2" onchange="change_lineWidth(this)" />
+				<div>
+					<span class="lineWidth_btn_left">细</span>
+					<span class="lineWidth_btn_right">粗</span>
+				</div>
+			</div>
+			<img src="imgs/xpc.svg" id="reset">
+			<img src="imgs/save.svg" id="changeToImg">
+			<!-- <span id="reset">清空</span>
+			<span id="changeToImg">提交</span> -->
+			<div class="uploadPic">
+				<img src="imgs/uploadPic.svg">
+				<input type="file" id="chooseImage" class="filepath" accept="image/jpg,image/jpeg,image/png,image/PNG">
+			</div>
+			<span class="float_right">
+				<span data-color="#000" class="color_btn blank active"></span>
+				<span data-color="#f40d0d" class="color_btn red"></span>
+				<span data-color="#1EAFE9" class="color_btn blue"></span>
+			</span>
+		</div>
+	</div>
+	<!-- <p>图片预览：</p>
+		<div id="imgShow"></div> -->
+	<div class="shadowBox">
+		请旋转屏幕再浏览
+	</div>
+	<script>
+		var signObj = $('#signature');
+		var evt = "onorientationchange" in window ? "orientationchange" : "resize";
+		window.addEventListener(evt, resize, false);
+		// 监听屏幕旋转
+		function resize(fals) {
+			var currDeviceObj = currDevice();
+			if (window.orientation == 0 || window.orientation == 180) {
+				if ($('.shadowBox').hasClass('active')) {
+					window.location.reload()
+				}
+			} else {
+				if (currDeviceObj.mobile) {
+					if (!currDevice.iPad) {
+						$('.shadowBox').addClass('active')
+					} else {
+						$('.shadowBox').removeClass('active')
+					}
+				}
+			}
+		}
+		resize(true);
+		$(function () {
+			var currDeviceObj = currDevice();
+			var whArr = deviceBrowserWH();
+			// if ($(document).width() > $(document).height()) {
+			if(whArr[0]>whArr[1]){
+				// 横屏
+				$('.signTip').css({
+					width: '100vw'
+				});
+				if(currDeviceObj.mobile){
+					if (!currDevice.iPad) {
+						$('.shadowBox').addClass('active')
+					}else{
+						$('.shadowBox').removeClass('active')
+					}
+				}
+
+			} else {
+				$('.subSignTip span,.buttonWrap img').css({
+					transform: 'rotate(90deg)',
+					display: 'inline-block'
+				});
+				// $('.buttonWrap span').css({
+				// 	'margin-bottom': '50px',
+				// });
+			}
+			// 初始化画布
+			signObj.jSignature({
+				width: '100vw',
+				height: '100vh',
+				'UndoButton': false,
+				lineWidth: 5,
+				color: '#000'
+			});
+			$("#signature").bind('change', function (e) {
+				$('.placeholderBox').hide();
+			})
+			// 清空画布
+			$('#reset').click(function () {
+				signObj.jSignature("reset");
+				$('.placeholderBox').show();
+			})
+			// 转换成图片
+			$('#changeToImg').click(function () {
+				convertToImg();
+			})
+			// x下载签名文件
+			$('#download').click(function () {
+				if ($('#imgShow img').length == 0) {
+					convertToImg();
+				}
+				downloadImg('pic.png', $('#imgShow img').attr("src"));
+			})
+			// 选择颜色
+			$(".color_btn").click(function () {
+				$(this).addClass("active").siblings(".color_btn").removeClass("active");
+				signObj.jSignature("setColor", $(this).attr("data-color"));
+			})
+			// 上传图片
+			$('#chooseImage').on('change', function () { //当chooseImage的值改变时，执行此函数
+				var filePath = $(this).val(), //获取到input的value，里面是文件的路径
+					fileFormat = filePath.substring(filePath.lastIndexOf(".")).toLowerCase(),
+					src = window.URL.createObjectURL(this.files[0]); //转成可以在本地预览的格式
+				// 检查是否是图片
+				if (!fileFormat.match(/.png|.jpg|.jpeg/)) {
+					error_prompt_alert('上传错误,文件格式必须为：png/jpg/jpeg');
+					return;
+				} else {
+					processImage(this.files[0])
+				}
+			});
+		})
+		/**
+		 * 获取设备、浏览器的宽度和高度
+		 * @returns
+		 */
+		function deviceBrowserWH() {
+			//获取浏览器窗口的内部宽高 - IE9+、chrome、firefox、Opera、Safari：
+			var w = window.innerWidth;
+			var h = window.innerHeight;
+
+			// HTML文档所在窗口的当前宽高 - IE8.7.6.5
+			document.documentElement.clientWidth;
+			document.documentElement.clientHeight;
+			document.body.clientWidth;
+			document.body.clientHeight;
+
+			var screenW = window.screen.width;//设备的宽度
+			var screenH = document.body.clientHeight;
+
+			//网页可见区域宽高，不包括工具栏和滚动条（浏览器窗口可视区域大小）
+			var webpageVisibleW = document.documentElement.clientWidth || document.body.clientWidth;
+			var webpageVisibleH = document.documentElement.clientHeight || document.body.clientHeight;
+
+			//网页正文全文宽高(不包括滚动条)
+			var webpageW = document.documentElement.scrollWidth || document.body.scrollWidth;
+			var webpageH = document.documentElement.scrollHeight || document.body.scrollHeight;
+
+			//网页可见区域宽高，包括滚动条等边线（会随窗口的显示大小改变）
+			var webpageVisibleW2 = document.documentElement.offsetWidth || document.body.offsetWidth;
+			var webpageVisibleH2 = document.documentElement.offsetHeight || document.body.offsetHeight;
+
+			console.log(w + '*' + h);
+			console.log(screenW + '*' + screenH);
+			console.log(webpageVisibleW + '*' + webpageVisibleH);
+			console.log(webpageW + '*' + webpageH);
+			console.log(webpageVisibleW2 + '*' + webpageVisibleH2);
+			return [w,h]
+			//网页卷去的距离与偏移量
+			/*
+			1.scrollLeft:设置或获取位于给定对象左边界与窗口中目前可见内容的最左端之间的距离；
+			2.scrollTop:设置或获取位于给定对象最顶端与窗口中目前可见内容的最左端之间的距离；
+			3.offsetLeft:设置或获取位于给定对象相对于版面或由offsetParent属性指定的父坐标的计算左侧位置；
+			4.offsetTop:设置或获取位于给定对象相对于版面或由offsetParent属性指定的父坐标的计算顶端位置；
+		*/
+
+		}
+		/**
+		 * 判断当前设备
+		 * @returns
+		 */
+		function currDevice() {
+			var u = navigator.userAgent;
+			var app = navigator.appVersion;// appVersion 可返回浏览器的平台和版本信息。该属性是一个只读的字符串。
+			var browserLang = (navigator.browserLanguage || navigator.language).toLowerCase();	//获取浏览器语言
+
+			var deviceBrowser = function () {
+				return {
+					trident: u.indexOf('Trident') > -1,  //IE内核
+					presto: u.indexOf('Presto') > -1,  //opera内核
+					webKit: u.indexOf('AppleWebKit') > -1,  //苹果、谷歌内核
+					gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1,  //火狐内核
+					mobile: !!u.match(/AppleWebKit.*Mobile.*/),  //是否为移动终端
+					ios: !!u.match(/\(i[^;]+;( U;)? CPU.Mac OS X/),  //ios终端
+					android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1,  //android终端或者uc浏览器
+					iPhone: u.indexOf('iPhone') > -1,  //是否为iPhone或者QQHD浏览器
+					iPad: u.indexOf('iPad') > -1,  //是否iPad
+					webApp: u.indexOf('Safari') == -1,  //是否web应用程序，没有头部和底部
+					weixin: u.indexOf('MicroMessenger') > -1,  //是否微信
+					qq: u.match(/\sQQ/i) == " qq",  //是否QQ
+				}
+			}();
+			return deviceBrowser;
+			console.log(deviceBrowser);
+
+		}
+		// 获取到上传图片的base64地址
+		function processImage(file) {
+			var canvas = document.querySelector('.jSignature');
+			var context = canvas.getContext("2d");
+			var reader = new FileReader();
+			if (reader.readAsDataURL) {
+				reader.readAsDataURL(file);
+			} else if (reader.readAsDataurl) {
+				reader.readAsDataurl(file);
+			}
+			reader.onload = function (e) {
+				uploadCallback(e.target.result);
+				return;
+				// 导入图像数据
+				signObj.jSignature("reset");
+				//  将图片绘制到画布上
+				$("#signature").jSignature("importData", e.target.result);
+				// var img = new Image();
+				// img.src = e.target.result;
+				// img.onload = function() {}
+				// $(img).appendTo($('#imgShow'));
+			}
+		}
+		// 上传图片后的回调函数
+		function uploadCallback(base_url) {
+			// TODO
+			console.log(base_url)
+		}
+		// Base64Url to Blob
+		function convertBase64UrlToBlob(_url) {
+			let bytes = window.atob(_url.split(',')[1]); //
+			let ab = new ArrayBuffer(bytes.length);
+			let ua = new Uint8Array(ab);
+			for (let i = 0; i < bytes.length; i++) {
+				ua[i] = bytes.charCodeAt(i);
+			}
+			return new Blob([ab], {
+				type: 'image/png'
+			});
+		}
+		// 下载图片
+		function downloadImg(name, url) {
+			let aDom = document.createElement('a');
+
+			let blob = convertBase64UrlToBlob(url);
+
+			aDom.download = name;
+			aDom.href = URL.createObjectURL(blob);
+			aDom.click();
+		}
+		//  修改签名线条宽度
+		function change_lineWidth(obj) {
+			var val = $(obj).val();
+			signObj.jSignature('setLineWidth', val);
+		}
+		// 获取当前生成的图片
+		function convertToImg() {
+			// let dataStr = $("#signature").jSignature("getData");
+			//可选格式：native,image,base30,image/jsignature;base30,svg,image/svg+xml,svgbase64,image/svg+xml;base64
+			var dataStr = "data:" + $("#signature").jSignature('getData', "image");
+			console.log(dataStr)
+			// todo
+		}
+
+	</script>
+</body>
+
+</html>
