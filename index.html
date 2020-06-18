@@ -58,12 +58,13 @@
 			</span> -->
 		</div>
 	</div>
-	<!-- <p>图片预览：</p>
-		<div id="imgShow"></div> -->
+	<p>图片预览：</p>
+		<img id="imgShow" src=""/>
 	<div class="shadowBox">
 		请旋转屏幕再浏览
 	</div>
 	<script>
+		var isSignName = false;
 		var signObj = $('#signature');
 		var evt = "onorientationchange" in window ? "orientationchange" : "resize";
 		window.addEventListener(evt, resize, false);
@@ -121,15 +122,21 @@
 			});
 			$("#signature").bind('change', function (e) {
 				$('.placeholderBox').hide();
+				isSignName = true;
 			})
 			// 清空画布
 			$('#reset').click(function () {
 				signObj.jSignature("reset");
+				isSignName = false;
 				$('.placeholderBox').show();
 			})
 			// 转换成图片
 			$('#changeToImg').click(function () {
-				convertToImg();
+				if(isSignName){
+					convertToImg();
+				}else{
+					alert('签名不可以为空!')
+				}
 			})
 			// x下载签名文件
 			$('#download').click(function () {
@@ -291,8 +298,30 @@
 			// let dataStr = $("#signature").jSignature("getData");
 			//可选格式：native,image,base30,image/jsignature;base30,svg,image/svg+xml,svgbase64,image/svg+xml;base64
 			var dataStr = "data:" + $("#signature").jSignature('getData', "image");
-			console.log(dataStr)
+			rotageImage(dataStr)
+			// $('#imgShow').attr('src', dataStr)
+	
 			// todo
+		}
+		// 旋转图片
+		function rotageImage(imgSrc){
+			var img = new Image();
+			img.src = imgSrc;
+			var imgSrcc=''
+			img.onload = function() {
+				//生成canvas
+				var canvass = document.createElement('canvas');
+				var ctxx = canvass.getContext('2d');
+				canvass.width = img.height;
+				canvass.height = img.width;
+				ctxx.translate(canvass.width / 2, canvass.height / 2)
+				// 2.3 画布旋转90°
+				ctxx.rotate(270 * Math.PI / 180);
+				ctxx.drawImage(img, -img.width/2, -img.height/2);
+				var snapData = canvass.toDataURL('image/png');
+				 imgSrcc = 'data:image/png;' + snapData;
+				// $('#imgShow').attr('src', imgSrcc)
+			}
 		}
 
 	</script>
