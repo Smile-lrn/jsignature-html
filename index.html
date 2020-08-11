@@ -312,15 +312,17 @@
 				//生成canvas
 				var canvass = document.createElement('canvas');
 				var ctxx = canvass.getContext('2d');
-				canvass.width = img.height;
-				canvass.height = img.width;
+				var per =1/3;//设置比例
+				canvass.width = img.height*per;
+				canvass.height = img.width*per;
 				ctxx.translate(canvass.width / 2, canvass.height / 2)
 				// 2.3 画布旋转90°
 				ctxx.rotate(270 * Math.PI / 180);
-				ctxx.drawImage(img, -img.width/2, -img.height/2);
+				ctxx.drawImage(img, -img.width/2 * per, -img.height/2 * per, img.width * per, img.height * per);
+				// ctxx.drawImage(img, -img.height / 2 * per, -img.width / 2 * per, img.height * per, img.width * per);
 				var snapData = canvass.toDataURL('image/png');
 				 imgSrcc = 'data:image/png;' + snapData;
-				// $('#imgShow').attr('src', imgSrcc)
+				$('#imgShow').attr('src', imgSrcc)
 			}
 		}
 
